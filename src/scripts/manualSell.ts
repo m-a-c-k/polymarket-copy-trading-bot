@@ -86,7 +86,7 @@ const fetchPositions = async (): Promise<Position[]> => {
     if (!response.ok) {
         throw new Error(`Failed to fetch positions: ${response.statusText}`);
     }
-    return response.json();
+    return (await response.json()) as Position[];
 };
 
 const findMatchingPosition = (positions: Position[], searchQuery: string): Position | undefined => {

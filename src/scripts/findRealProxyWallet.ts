@@ -44,7 +44,7 @@ async function findRealProxyWallet() {
 
         try {
             const response = await fetch(polygonscanUrl);
-            const data = await response.json();
+            const data = (await response.json()) as { status?: string; result?: any[] };
 
             if (data.status === '1' && data.result && data.result.length > 0) {
                 console.log(`   ✅ Found transactions: ${data.result.length}\n`);
