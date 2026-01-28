@@ -141,7 +141,16 @@ export function calculateOrderSize(
         reasoning += ` → Reduced to fit balance ($${maxAffordable.toFixed(2)})`;
     }
 
-    // Step 5: Check minimum order size
+    // Step 5: Round up to minimum if close (within 50% of minimum)
+    // This prevents missing positions when slightly under minimum
+    const minThreshold = config.minOrderSizeUSD * 0.5;
+    if (finalAmount >= minThreshold && finalAmount < config.minOrderSizeUSD) {
+        const originalAmount = finalAmount;
+        finalAmount = config.minOrderSizeUSD;
+        reasoning += ` → Rounded up from $${originalAmount.toFixed(2)} to minimum $${config.minOrderSizeUSD}`;
+    }
+
+    // Step 6: Check minimum order size (hard limit)
     if (finalAmount < config.minOrderSizeUSD) {
         belowMinimum = true;
         reasoning += ` → Below minimum $${config.minOrderSizeUSD}`;

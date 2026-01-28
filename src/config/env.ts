@@ -94,10 +94,10 @@ const validateNumericConfig = (): void => {
         );
     }
 
-    const tooOldTimestamp = parseInt(process.env.TOO_OLD_TIMESTAMP || '24', 10);
-    if (isNaN(tooOldTimestamp) || tooOldTimestamp < 1) {
+    const tooOldTimestamp = parseFloat(process.env.TOO_OLD_TIMESTAMP || '24');
+    if (isNaN(tooOldTimestamp) || tooOldTimestamp <= 0) {
         throw new Error(
-            `Invalid TOO_OLD_TIMESTAMP: ${process.env.TOO_OLD_TIMESTAMP}. Must be a positive integer (hours).`
+            `Invalid TOO_OLD_TIMESTAMP: ${process.env.TOO_OLD_TIMESTAMP}. Must be a positive number (hours).`
         );
     }
 
