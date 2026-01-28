@@ -7,6 +7,7 @@ import { calculateOrderSize, getTradeMultiplier } from '../config/copyStrategy';
 
 const RETRY_LIMIT = ENV.RETRY_LIMIT;
 const COPY_STRATEGY_CONFIG = ENV.COPY_STRATEGY_CONFIG;
+const PREVIEW_MODE = ENV.PREVIEW_MODE;
 
 // Legacy parameters (for backward compatibility in SELL logic)
 const TRADE_MULTIPLIER = ENV.TRADE_MULTIPLIER;
@@ -89,6 +90,13 @@ const postOrder = async (
             Logger.warning(
                 `Position size (${remaining.toFixed(2)} tokens) too small to merge - skipping`
             );
+            await UserActivity.updateOne({ _id: trade._id }, { bot: true });
+            return;
+        }
+
+        // PREVIEW MODE CHECK
+        if (PREVIEW_MODE) {
+            Logger.warning(`\n🔍 PREVIEW MODE - Would merge ${remaining.toFixed(2)} tokens (NOT executing)\n`);
             await UserActivity.updateOne({ _id: trade._id }, { bot: true });
             return;
         }
@@ -191,6 +199,13 @@ const postOrder = async (
             if (orderCalc.belowMinimum) {
                 Logger.warning(`💡 Increase COPY_SIZE or wait for larger trades`);
             }
+            await UserActivity.updateOne({ _id: trade._id }, { bot: true });
+            return;
+        }
+
+        // PREVIEW MODE CHECK
+        if (PREVIEW_MODE) {
+            Logger.warning(`\n🔍 PREVIEW MODE - Would copy $${orderCalc.finalAmount.toFixed(2)} (NOT executing)\n`);
             await UserActivity.updateOne({ _id: trade._id }, { bot: true });
             return;
         }
@@ -390,6 +405,13 @@ const postOrder = async (
             );
             Logger.warning(`Capping to maximum available: ${my_position.size.toFixed(2)} tokens`);
             remaining = my_position.size;
+        }
+
+        // PREVIEW MODE CHECK
+        if (PREVIEW_MODE) {
+            Logger.warning(`\n🔍 PREVIEW MODE - Would sell ${remaining.toFixed(2)} tokens (NOT executing)\n`);
+            await UserActivity.updateOne({ _id: trade._id }, { bot: true });
+            return;
         }
 
         let retry = 0;
