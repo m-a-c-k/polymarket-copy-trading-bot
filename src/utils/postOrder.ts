@@ -8,6 +8,7 @@ import { calculateOrderSize, getTradeMultiplier } from '../config/copyStrategy';
 const RETRY_LIMIT = ENV.RETRY_LIMIT;
 const COPY_STRATEGY_CONFIG = ENV.COPY_STRATEGY_CONFIG;
 const PREVIEW_MODE = ENV.PREVIEW_MODE;
+const CRYPTO_ONLY = ENV.CRYPTO_ONLY;
 
 // Legacy parameters (for backward compatibility in SELL logic)
 const TRADE_MULTIPLIER = ENV.TRADE_MULTIPLIER;
@@ -64,6 +65,30 @@ const isInsufficientBalanceOrAllowanceError = (message: string | undefined): boo
     return lower.includes('not enough balance') || lower.includes('allowance');
 };
 
+/**
+ * Check if a market is crypto-related
+ */
+const isCryptoMarket = (market: string): boolean => {
+    const cryptoKeywords = [
+        'bitcoin', 'btc',
+        'ethereum', 'eth',
+        'solana', 'sol',
+        'xrp', 'ripple',
+        'crypto',
+        'bnb', 'binance',
+        'cardano', 'ada',
+        'dogecoin', 'doge',
+        'polygon', 'matic',
+        'polkadot', 'dot',
+        'avalanche', 'avax',
+        'chainlink', 'link',
+        'litecoin', 'ltc'
+    ];
+
+    const lowerMarket = market.toLowerCase();
+    return cryptoKeywords.some(keyword => lowerMarket.includes(keyword));
+};
+
 const postOrder = async (
     clobClient: ClobClient,
     condition: string,
@@ -75,6 +100,14 @@ const postOrder = async (
     userAddress: string
 ) => {
     const UserActivity = getUserActivityModel(userAddress);
+
+    // CRYPTO-ONLY FILTER: Skip non-crypto markets if enabled
+    const marketSlug = trade.eventSlug || trade.slug || '';
+    if (CRYPTO_ONLY && !isCryptoMarket(marketSlug)) {
+        Logger.info(`⏭️  Skipping non-crypto market: ${marketSlug}`);
+        await UserActivity.updateOne({ _id: trade._id }, { bot: true });
+        return;
+    }
     //Merge strategy
     if (condition === 'merge') {
         Logger.info('Executing MERGE strategy...');

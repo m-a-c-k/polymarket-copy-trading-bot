@@ -329,7 +329,7 @@ export const ENV = {
     CLOB_HTTP_URL: process.env.CLOB_HTTP_URL as string,
     CLOB_WS_URL: process.env.CLOB_WS_URL as string,
     FETCH_INTERVAL: parseInt(process.env.FETCH_INTERVAL || '1', 10),
-    TOO_OLD_TIMESTAMP: parseInt(process.env.TOO_OLD_TIMESTAMP || '24', 10),
+    TOO_OLD_TIMESTAMP: parseFloat(process.env.TOO_OLD_TIMESTAMP || '24'),
     RETRY_LIMIT: parseInt(process.env.RETRY_LIMIT || '3', 10),
     // Legacy parameters (kept for backward compatibility)
     TRADE_MULTIPLIER: parseFloat(process.env.TRADE_MULTIPLIER || '1.0'),
@@ -347,6 +347,8 @@ export const ENV = {
     ), // 5 minutes default
     // Preview mode (dry run)
     PREVIEW_MODE: process.env.PREVIEW_MODE === 'true',
+    // Market filtering
+    CRYPTO_ONLY: process.env.CRYPTO_ONLY === 'true',
     MONGO_URI: process.env.MONGO_URI as string,
     RPC_URL: process.env.RPC_URL as string,
     USDC_CONTRACT_ADDRESS: process.env.USDC_CONTRACT_ADDRESS as string,
